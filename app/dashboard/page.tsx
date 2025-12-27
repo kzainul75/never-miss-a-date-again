@@ -1,19 +1,146 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Calendar, Gift, Heart, Plus, Users, TrendingUp, Sparkles } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { Calendar, Gift, Heart, Plus, Users, TrendingUp, Sparkles, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 /**
  * Dashboard Page Component
- * Updated with new branding and functional navigation
+ * Functional date management and Shopify integration
  */
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('dates')
+  const [dates, setDates] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [user, setUser] = useState<any>(null)
+
+  // Form state
+  const [formData, setFormData] = useState({
+    title: '',
+    date: '',
+    type: 'birthday',
+    reminderDays: '7',
+    description: '',
+  })
+
+  useEffect(() => {
+    // Get user from localStorage
+    const storedUser = localStorage.getItem('user')
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser)
+      setUser(parsedUser)
+      fetchDates(parsedUser.id)
+    } else {
+      setLoading(false)
+    }
+  }, [])
+
+  const fetchDates = async (userId: string) => {
+    try {
+      const response = await fetch(`/api/dates?userId=${userId}`)
+      const data = await response.json()
+      if (data.dates) {
+        setDates(data.dates)
+      }
+    } catch (error) {
+      console.error('Error fetching dates:', error)
+      toast.error('Failed to load your dates')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+  }
+
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!user) {
+      toast.error('Please log in first')
+      return
+    }
+
+    setSubmitting(true)
+    try {
+      const response = await fetch('/api/dates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          userId: user.id,
+          reminderDays: parseInt(formData.reminderDays),
+        }),
+      })
+
+      if (response.ok) {
+        toast.success('Date added successfully!')
+        setIsDialogOpen(false)
+        setFormData({
+          title: '',
+          date: '',
+          type: 'birthday',
+          reminderDays: '7',
+          description: '',
+        })
+        fetchDates(user.id)
+      } else {
+        const error = await response.json()
+        toast.error(error.error || 'Failed to add date')
+      }
+    } catch (error) {
+      toast.error('An error occurred. Please try again.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const getDaysRemaining = (dateStr: string) => {
+    const eventDate = new Date(dateStr)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
+    // Set event to current year or next year if already passed
+    eventDate.setFullYear(today.getFullYear())
+    if (eventDate < today) {
+      eventDate.setFullYear(today.getFullYear() + 1)
+    }
+    
+    const diffTime = Math.abs(eventDate.getTime() - today.getTime())
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    return diffDays
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -29,8 +156,8 @@ export default function Dashboard() {
           <div className="flex items-center gap-4">
             <Link href="/gifts" className="text-sm text-gray-600 hover:text-rose-600 transition">Gifts</Link>
             <Link href="/shops" className="text-sm text-gray-600 hover:text-rose-600 transition">Shops</Link>
-            <div className="w-8 h-8 bg-rose-100 rounded-full flex items-center justify-center text-rose-600 font-bold text-xs">
-              JD
+            <div className="w-8 h-8 bg-rose-100 rounded-full flex items-center justify-center text-rose-600 font-bold text-xs uppercase">
+              {user?.name?.substring(0, 2) || 'JD'}
             </div>
           </div>
         </div>
@@ -41,12 +168,97 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">My Dashboard</h1>
-            <p className="text-gray-600 mt-1">Welcome back! Manage your dates and discover gifts</p>
+            <p className="text-gray-600 mt-1">Welcome back, {user?.name || 'Guest'}! Manage your dates and discover gifts</p>
           </div>
-          <Button className="bg-rose-600 hover:bg-rose-700 w-full md:w-auto">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Important Date
-          </Button>
+          
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-rose-600 hover:bg-rose-700 w-full md:w-auto">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Important Date
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <form onSubmit={handleSubmit}>
+                <DialogHeader>
+                  <DialogTitle>Add Important Date</DialogTitle>
+                  <DialogDescription>
+                    Keep track of birthdays, anniversaries, and more.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="title">Event Title</Label>
+                    <Input
+                      id="title"
+                      name="title"
+                      placeholder="e.g. Mom's Birthday"
+                      value={formData.title}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="date">Date</Label>
+                    <Input
+                      id="date"
+                      name="date"
+                      type="date"
+                      value={formData.date}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="type">Event Type</Label>
+                    <Select 
+                      value={formData.type} 
+                      onValueChange={(v) => handleSelectChange('type', v)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="birthday">Birthday</SelectItem>
+                        <SelectItem value="anniversary">Anniversary</SelectItem>
+                        <SelectItem value="wedding">Wedding</SelectItem>
+                        <SelectItem value="graduation">Graduation</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="reminderDays">Reminder (days before)</Label>
+                    <Input
+                      id="reminderDays"
+                      name="reminderDays"
+                      type="number"
+                      min="1"
+                      max="30"
+                      value={formData.reminderDays}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="description">Notes (optional)</Label>
+                    <Textarea
+                      id="description"
+                      name="description"
+                      placeholder="Gift ideas, preferences, etc."
+                      value={formData.description}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button type="submit" className="bg-rose-600 hover:bg-rose-700" disabled={submitting}>
+                    {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Save Date
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
       </header>
 
@@ -58,7 +270,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm">Upcoming</p>
-                <p className="text-2xl md:text-3xl font-bold text-gray-900 mt-2">8</p>
+                <p className="text-2xl md:text-3xl font-bold text-gray-900 mt-2">{dates.length}</p>
               </div>
               <Calendar className="w-8 h-8 md:w-10 md:h-10 text-rose-600 opacity-20" />
             </div>
@@ -118,73 +330,61 @@ export default function Dashboard() {
 
           {/* Important Dates Tab */}
           <TabsContent value="dates" className="space-y-4">
-            <div className="grid gap-4">
-              {/* Date Item 1 */}
-              <Card className="p-6 border-0 shadow-sm hover:shadow-md transition">
-                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900">Mom&apos;s Birthday</h3>
-                      <Badge className="bg-rose-100 text-rose-700">In 5 days</Badge>
+            {loading ? (
+              <div className="text-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin mx-auto text-rose-600" />
+                <p className="mt-2 text-gray-600">Loading your dates...</p>
+              </div>
+            ) : dates.length > 0 ? (
+              <div className="grid gap-4">
+                {dates.map((date) => (
+                  <Card key={date.id} className="p-6 border-0 shadow-sm hover:shadow-md transition">
+                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="text-lg font-semibold text-gray-900">{date.title}</h3>
+                          <Badge className="bg-rose-100 text-rose-700">
+                            In {getDaysRemaining(date.date)} days
+                          </Badge>
+                        </div>
+                        <p className="text-gray-600 text-sm mb-3">
+                          {new Date(date.date).toLocaleDateString('en-US', { 
+                            month: 'long', 
+                            day: 'numeric', 
+                            year: 'numeric' 
+                          })}
+                        </p>
+                        <div className="flex items-center gap-4 text-sm text-gray-600">
+                          <span className="capitalize">🏷️ {date.type}</span>
+                          <span>🔔 Reminder: {date.reminderDays} days before</span>
+                        </div>
+                        {date.description && (
+                          <p className="mt-2 text-sm text-gray-500 italic">Note: {date.description}</p>
+                        )}
+                      </div>
+                      <Link href="/gifts">
+                        <Button className="bg-rose-600 hover:bg-rose-700 w-full md:w-auto">
+                          Find Gift
+                        </Button>
+                      </Link>
                     </div>
-                    <p className="text-gray-600 text-sm mb-3">January 2, 2026</p>
-                    <div className="flex items-center gap-4 text-sm text-gray-600">
-                      <span>👤 Mother</span>
-                      <span>🔔 Reminder: 7 days before</span>
-                    </div>
-                  </div>
-                  <Link href="/gifts">
-                    <Button className="bg-rose-600 hover:bg-rose-700 w-full md:w-auto">
-                      Find Gift
-                    </Button>
-                  </Link>
-                </div>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card className="p-12 text-center border-dashed border-2">
+                <Calendar className="h-12 w-12 mx-auto text-gray-300 mb-4" />
+                <h3 className="text-lg font-medium text-gray-900">No dates added yet</h3>
+                <p className="text-gray-500 mb-6">Add your first important date to get started!</p>
+                <Button 
+                  onClick={() => setIsDialogOpen(true)}
+                  variant="outline" 
+                  className="border-rose-200 text-rose-600 hover:bg-rose-50"
+                >
+                  Add Your First Date
+                </Button>
               </Card>
-
-              {/* Date Item 2 */}
-              <Card className="p-6 border-0 shadow-sm hover:shadow-md transition">
-                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900">Anniversary</h3>
-                      <Badge className="bg-pink-100 text-pink-700">In 12 days</Badge>
-                    </div>
-                    <p className="text-gray-600 text-sm mb-3">January 9, 2026</p>
-                    <div className="flex items-center gap-4 text-sm text-gray-600">
-                      <span>👥 Partner</span>
-                      <span>🔔 Reminder: 7 days before</span>
-                    </div>
-                  </div>
-                  <Link href="/gifts">
-                    <Button className="bg-pink-600 hover:bg-pink-700 w-full md:w-auto">
-                      Find Gift
-                    </Button>
-                  </Link>
-                </div>
-              </Card>
-
-              {/* Date Item 3 */}
-              <Card className="p-6 border-0 shadow-sm hover:shadow-md transition">
-                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900">Sister&apos;s Birthday</h3>
-                      <Badge className="bg-purple-100 text-purple-700">In 18 days</Badge>
-                    </div>
-                    <p className="text-gray-600 text-sm mb-3">January 15, 2026</p>
-                    <div className="flex items-center gap-4 text-sm text-gray-600">
-                      <span>👤 Sister</span>
-                      <span>🔔 Reminder: 7 days before</span>
-                    </div>
-                  </div>
-                  <Link href="/gifts">
-                    <Button className="bg-purple-600 hover:bg-purple-700 w-full md:w-auto">
-                      Find Gift
-                    </Button>
-                  </Link>
-                </div>
-              </Card>
-            </div>
+            )}
           </TabsContent>
 
           {/* Trending Gifts Tab */}
