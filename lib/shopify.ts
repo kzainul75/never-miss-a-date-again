@@ -16,11 +16,13 @@ const storefrontAccessToken = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_
  */
 export async function shopifyFetch(query: string, variables = {}) {
   if (!domain || !storefrontAccessToken) {
-    console.warn('Shopify credentials missing. Falling back to mock data.');
+    console.warn('Shopify credentials missing.');
     return null;
   }
 
   try {
+    console.log(`Fetching from Shopify: https://${domain}/api/2024-01/graphql.json`);
+    
     const response = await fetch(
       `https://${domain}/api/2024-01/graphql.json`,
       {
@@ -30,15 +32,22 @@ export async function shopifyFetch(query: string, variables = {}) {
           "X-Shopify-Storefront-Access-Token": storefrontAccessToken,
         },
         body: JSON.stringify({ query, variables }),
-        next: { revalidate: 3600 } // Cache for 1 hour
+        cache: 'no-store' // Disable caching for debugging
       }
     );
 
+    const json = await response.json();
+
     if (!response.ok) {
+      console.error('Shopify API error response:', json);
       throw new Error(`Shopify API error: ${response.statusText}`);
     }
 
-    return response.json();
+    if (json.errors) {
+      console.error('Shopify GraphQL errors:', json.errors);
+    }
+
+    return json;
   } catch (error) {
     console.error('Error fetching from Shopify:', error);
     return null;
