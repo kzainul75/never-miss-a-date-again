@@ -1,25 +1,22 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { BarChart3, Users, Gift, Store, TrendingUp, Settings } from 'lucide-react'
+import { BarChart3, Users, Gift, Store, TrendingUp, Settings, ExternalLink, ShoppingBag } from 'lucide-react'
 
 /**
  * Admin Dashboard Page
  * Allows administrators to manage gifts, shops, and view analytics
- * Includes gift catalog management, shop directory management, and user analytics
+ * Integrated with Shopify for product management
  */
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview')
-  const [newGift, setNewGift] = useState({
-    name: '',
-    price: '',
-    category: 'bouquet',
-  })
+  const shopifyDomain = process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -30,10 +27,25 @@ export default function AdminDashboard() {
             <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
             <p className="text-gray-600 mt-1">Manage gifts, shops, and view analytics</p>
           </div>
-          <Button className="bg-rose-600 hover:bg-rose-700">
-            <Settings className="w-4 h-4 mr-2" />
-            Settings
-          </Button>
+          <div className="flex gap-3">
+            {shopifyDomain && (
+              <a 
+                href={`https://${shopifyDomain}/admin`} 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                <Button variant="outline" className="border-rose-200 text-rose-600 hover:bg-rose-50">
+                  <ShoppingBag className="w-4 h-4 mr-2" />
+                  Shopify Admin
+                  <ExternalLink className="w-3 h-3 ml-2" />
+                </Button>
+              </a>
+            )}
+            <Button className="bg-rose-600 hover:bg-rose-700">
+              <Settings className="w-4 h-4 mr-2" />
+              Settings
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -166,42 +178,37 @@ export default function AdminDashboard() {
 
           {/* Gifts Tab */}
           <TabsContent value="gifts" className="space-y-6">
-            <Card className="p-6 border-0 shadow-sm">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Add New Gift</h3>
-              <div className="space-y-4">
-                <Input
-                  type="text"
-                  placeholder="Gift Name"
-                  value={newGift.name}
-                  onChange={(e) => setNewGift({ ...newGift, name: e.target.value })}
-                  className="w-full"
-                />
-                <Input
-                  type="number"
-                  placeholder="Price"
-                  value={newGift.price}
-                  onChange={(e) => setNewGift({ ...newGift, price: e.target.value })}
-                  className="w-full"
-                />
-                <select
-                  value={newGift.category}
-                  onChange={(e) => setNewGift({ ...newGift, category: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                >
-                  <option value="bouquet">Bouquet</option>
-                  <option value="hamper">Hamper</option>
-                  <option value="plant">Plant</option>
-                  <option value="gift_set">Gift Set</option>
-                </select>
-                <Button className="w-full bg-rose-600 hover:bg-rose-700">
-                  Add Gift
-                </Button>
+            <Card className="p-6 border-0 shadow-sm bg-rose-50 border-rose-100">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                  <ShoppingBag className="w-6 h-6 text-rose-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Manage Products in Shopify</h3>
+                  <p className="text-gray-600 text-sm">
+                    Your gift catalog is now powered by Shopify. Use the Shopify Admin to add, edit, or remove products.
+                  </p>
+                </div>
+                <div className="ml-auto">
+                  {shopifyDomain && (
+                    <a 
+                      href={`https://${shopifyDomain}/admin/products`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                    >
+                      <Button className="bg-rose-600 hover:bg-rose-700">
+                        Open Shopify Products
+                        <ExternalLink className="w-4 h-4 ml-2" />
+                      </Button>
+                    </a>
+                  )}
+                </div>
               </div>
             </Card>
 
             {/* Gift List */}
             <Card className="p-6 border-0 shadow-sm">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">All Gifts</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Local Catalog Overrides</h3>
               <div className="space-y-3">
                 {[
                   { name: 'Rose Bouquet', price: '$45', category: 'Bouquet', sales: 245 },
