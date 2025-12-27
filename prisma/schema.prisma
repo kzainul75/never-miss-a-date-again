@@ -1,0 +1,237 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// User model - stores customer/family member information
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  avatar    String?
+  
+  // Authentication fields
+  passwordHash String?
+  emailVerified DateTime?
+  
+  // User preferences
+  reminderDays Int @default(7)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  importantDates ImportantDate[]
+  favorites      Favorite[]
+  orders         Order[]
+  familyMembers  FamilyMember[]
+  ownedFamilies  Family[]        @relation("FamilyOwner")
+  reminders      Reminder[]
+}
+
+// Family model - groups of people to manage dates for
+model Family {
+  id        String   @id @default(cuid())
+  name      String
+  ownerId   String
+  owner     User     @relation("FamilyOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  members ImportantDate[]
+}
+
+// FamilyMember model - tracks family members and their relationships
+model FamilyMember {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  relation  String   // e.g., "Mother", "Sister", "Best Friend"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  importantDates ImportantDate[]
+}
+
+// ImportantDate model - birthdays, anniversaries, special occasions
+model ImportantDate {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  familyId    String?
+  family      Family?  @relation(fields: [familyId], references: [id], onDelete: SetNull)
+  memberId    String?
+  member      FamilyMember? @relation(fields: [memberId], references: [id], onDelete: SetNull)
+  
+  title       String   // e.g., "Mom's Birthday"
+  description String?
+  date        DateTime
+  type        String   // "birthday", "anniversary", "wedding", "graduation", "custom"
+  reminderDays Int     @default(7) // Days before to send reminder
+  reminderSent Boolean @default(false) // Track if reminder was sent
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  suggestions GiftSuggestion[]
+  reminders   Reminder[]
+}
+
+// Gift model - catalog of available gifts and bouquets
+model Gift {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  category    String   // "bouquet", "hamper", "plant", "gift_set", "custom"
+  price       Decimal  @db.Decimal(10, 2)
+  image       String
+  rating      Float    @default(0)
+  reviews     Int      @default(0)
+  
+  // Trending and seasonal info
+  isTrending  Boolean  @default(false)
+  season      String?  // "spring", "summer", "fall", "winter", "all"
+  occasion    String   // "birthday", "anniversary", "wedding", "congratulations", "sympathy", "all"
+  
+  // Shop info
+  shopId      String
+  shop        Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  favorites   Favorite[]
+  suggestions GiftSuggestion[]
+  orderItems  OrderItem[]
+}
+
+// Shop model - florist and gift shop information
+model Shop {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  address     String
+  phone       String?
+  email       String?
+  website     String?
+  image       String?
+  
+  // Location for map integration
+  latitude    Float?
+  longitude   Float?
+  
+  // Operating hours
+  openingTime String? // "09:00"
+  closingTime String? // "18:00"
+  
+  rating      Float    @default(0)
+  reviews     Int      @default(0)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  gifts       Gift[]
+  orders      Order[]
+}
+
+// Favorite model - user's favorite gifts and bouquets
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  giftId    String
+  gift      Gift     @relation(fields: [giftId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, giftId])
+}
+
+// GiftSuggestion model - AI-powered gift recommendations for important dates
+model GiftSuggestion {
+  id              String   @id @default(cuid())
+  importantDateId String
+  importantDate   ImportantDate @relation(fields: [importantDateId], references: [id], onDelete: Cascade)
+  giftId          String
+  gift            Gift     @relation(fields: [giftId], references: [id], onDelete: Cascade)
+  
+  reason          String   // Why this gift is suggested
+  relevanceScore  Float    @default(0) // 0-100 score
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([importantDateId, giftId])
+}
+
+// Order model - purchase history
+model Order {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shopId    String
+  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  
+  status    String   @default("pending") // "pending", "confirmed", "shipped", "delivered", "cancelled"
+  totalPrice Decimal @db.Decimal(10, 2)
+  
+  // Payment info
+  stripePaymentId String?
+  paymentStatus String @default("unpaid") // "unpaid", "paid", "failed"
+  
+  // Delivery info
+  deliveryDate DateTime?
+  deliveryAddress String?
+  recipientName String?
+  recipientPhone String?
+  
+  // Integration fields
+  invitationLink String?
+  locationBookingId String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  items     OrderItem[]
+}
+
+// OrderItem model - individual items in an order
+model OrderItem {
+  id      String @id @default(cuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  giftId  String
+  gift    Gift   @relation(fields: [giftId], references: [id], onDelete: Cascade)
+  
+  quantity Int
+  price    Decimal @db.Decimal(10, 2)
+
+  @@unique([orderId, giftId])
+}
+
+// Reminder model - tracks sent reminders
+model Reminder {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  importantDateId String
+  importantDate   ImportantDate @relation(fields: [importantDateId], references: [id], onDelete: Cascade)
+  
+  reminderType    String   // "email", "sms", "push"
+  sentAt          DateTime @default(now())
+  daysBeforeEvent Int      // How many days before the event this reminder was sent
+  
+  createdAt       DateTime @default(now())
+}

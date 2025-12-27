@@ -1,0 +1,46 @@
+$ next dev --turbopack
+   ▲ Next.js 15.5.6 (Turbopack)
+   - Local:        http://localhost:3000
+   - Network:      http://169.254.0.21:3000
+
+ ✓ Starting...
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+ ✓ Ready in 1867ms
+   Reload env: .env
+   Reload env: .env.local
+ ○ Compiling / ...
+ ✓ Compiled / in 5s
+ ⚠ metadataBase property in metadata export is not set for resolving social open graph or twitter images, using "http://localhost:3000". See https://nextjs.org/docs/app/api-reference/functions/generate-metadata#metadatabase
+ GET / 200 in 4315ms
+ GET / 200 in 5924ms
+ ⚠ Cross origin request detected from bloom-gift.lindy.site to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 595ms
+ GET /favicon.ico 200 in 934ms
+ ○ Compiling /dashboard ...
+ ✓ Compiled /dashboard in 785ms
+ GET /dashboard 200 in 1016ms
+ ✓ Compiled /gifts in 488ms
+ GET /gifts 200 in 711ms
+ ○ Compiling /shops ...
+ ✓ Compiled /shops in 537ms
+ GET /shops 200 in 780ms
+ GET / 200 in 216ms
+ GET /favicon.ico 200 in 272ms
+ GET / 200 in 219ms
+ GET /dashboard 200 in 244ms
+ GET /gifts 200 in 233ms
+ GET /shops 200 in 210ms
+ GET / 200 in 209ms
+ ✓ Compiled in 343ms
+ ✓ Compiled in 192ms
+ ✓ Compiled in 214ms
+ ✓ Compiled in 182ms
+ ⚠ metadataBase property in metadata export is not set for resolving social open graph or twitter images, using "http://localhost:3000". See https://nextjs.org/docs/app/api-reference/functions/generate-metadata#metadatabase
+ GET / 200 in 693ms
+ GET / 200 in 212ms
