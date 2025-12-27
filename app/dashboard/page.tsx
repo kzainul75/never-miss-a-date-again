@@ -3,10 +3,10 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
+import { /* Input */ } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Calendar, Gift, Heart, Plus, Clock, Users, TrendingUp, Settings } from 'lucide-react'
+import { Calendar, Gift, Heart, Plus, Users, TrendingUp } from 'lucide-react'
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('dates')
@@ -101,7 +101,7 @@ export default function Dashboard() {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900">Mom's Birthday</h3>
+                      <h3 className="text-lg font-semibold text-gray-900">Mom&apos;s Birthday</h3>
                       <Badge className="bg-rose-100 text-rose-700">In 5 days</Badge>
                     </div>
                     <p className="text-gray-600 text-sm mb-3">January 2, 2026</p>
@@ -141,7 +141,7 @@ export default function Dashboard() {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900">Sister's Birthday</h3>
+                      <h3 className="text-lg font-semibold text-gray-900">Sister&apos;s Birthday</h3>
                       <Badge className="bg-purple-100 text-purple-700">In 18 days</Badge>
                     </div>
                     <p className="text-gray-600 text-sm mb-3">January 15, 2026</p>

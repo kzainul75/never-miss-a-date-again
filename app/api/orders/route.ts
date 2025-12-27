@@ -1,6 +1,12 @@
 import { prisma } from '@/lib/db'
 import { NextRequest, NextResponse } from 'next/server'
 
+interface OrderItemInput {
+  giftId: string;
+  quantity: number;
+  price: number;
+}
+
 /**
  * POST /api/orders
  * Creates a new order with items
@@ -21,7 +27,7 @@ export async function POST(request: NextRequest) {
 
     // Calculate total price
     let totalPrice = 0
-    for (const item of items) {
+    for (const item of items as OrderItemInput[]) {
       const gift = await prisma.gift.findUnique({
         where: { id: item.giftId },
       })
@@ -46,7 +52,7 @@ export async function POST(request: NextRequest) {
         status: 'pending',
         paymentStatus: 'unpaid',
         items: {
-          create: items.map((item: any) => ({
+          create: (items as OrderItemInput[]).map((item) => ({
             giftId: item.giftId,
             quantity: item.quantity,
             price: item.price,

@@ -1,6 +1,16 @@
 import { prisma } from '@/lib/db'
 import { NextRequest, NextResponse } from 'next/server'
 
+interface GiftWithShop {
+  id: string;
+  name: string;
+  price: number | string | { toString(): string };
+  rating: number;
+  isTrending: boolean;
+  occasion: string;
+  shop: unknown;
+}
+
 /**
  * POST /api/recommendations
  * Generates AI-powered gift recommendations based on occasion and recipient
@@ -8,7 +18,7 @@ import { NextRequest, NextResponse } from 'next/server'
  */
 export async function POST(request: NextRequest) {
   try {
-    const { importantDateId, occasion, recipientAge } = await request.json()
+    const { importantDateId, occasion /* , recipientAge */ } = await request.json()
 
     if (!importantDateId || !occasion) {
       return NextResponse.json(
@@ -30,7 +40,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Score and rank gifts based on relevance
-    const scoredGifts = matchingGifts.map(gift => {
+    const scoredGifts = (matchingGifts as unknown as GiftWithShop[]).map((gift) => {
       let score = 0
 
       // Base score for matching occasion

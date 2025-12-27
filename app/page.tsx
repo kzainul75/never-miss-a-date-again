@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Heart, Calendar, Gift, MapPin, Sparkles, Clock, Users, TrendingUp } from 'lucide-react'
+import { Calendar, Gift, MapPin, Sparkles, Clock, Users, TrendingUp } from 'lucide-react'
 
 export default function Home() {
   const [email, setEmail] = useState('')
@@ -61,7 +61,7 @@ export default function Home() {
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-3">Smart Date Management</h3>
             <p className="text-gray-600">
-              Keep track of all important dates for family and friends. Get reminders before special occasions so you're always prepared.
+              Keep track of all important dates for family and friends. Get reminders before special occasions so you&apos;re always prepared.
             </p>
           </Card>
 

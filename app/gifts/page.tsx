@@ -5,8 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Gift, Heart, Search, Filter, Star } from 'lucide-react'
+import { Gift, Heart, Search, Star } from 'lucide-react'
 
 export default function GiftsPage() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -18,14 +17,6 @@ export default function GiftsPage() {
     { id: 'hamper', label: 'Hampers' },
     { id: 'plant', label: 'Plants' },
     { id: 'gift_set', label: 'Gift Sets' },
-  ]
-
-  const occasions = [
-    { id: 'birthday', label: 'Birthday' },
-    { id: 'anniversary', label: 'Anniversary' },
-    { id: 'wedding', label: 'Wedding' },
-    { id: 'congratulations', label: 'Congratulations' },
-    { id: 'sympathy', label: 'Sympathy' },
   ]
 
   const gifts = [

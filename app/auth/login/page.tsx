@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -8,11 +8,10 @@ import { Input } from '@/components/ui/input'
 import { Sparkles } from 'lucide-react'
 
 /**
- * Login Page Component
- * Allows users to log in with email and password
- * Includes form validation and error handling
+ * Login Form Component
+ * Extracted to be wrapped in Suspense because of useSearchParams
  */
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [formData, setFormData] = useState({
@@ -72,13 +71,89 @@ export default function LoginPage() {
       localStorage.setItem('token', data.token)
       localStorage.setItem('user', JSON.stringify(data.user))
       router.push('/dashboard')
-    } catch (err) {
+    } catch {
       setError('An error occurred. Please try again.')
     } finally {
       setLoading(false)
     }
   }
 
+  return (
+    <Card className="p-8 border-0 shadow-lg">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Success Message */}
+        {message && (
+          <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
+            {message}
+          </div>
+        )}
+
+        {/* Error Message */}
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            {error}
+          </div>
+        )}
+
+        {/* Email Input */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Email Address
+          </label>
+          <Input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="you@example.com"
+            className="w-full"
+          />
+        </div>
+
+        {/* Password Input */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Password
+          </label>
+          <Input
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="••••••••"
+            className="w-full"
+          />
+        </div>
+
+        {/* Submit Button */}
+        <Button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-rose-600 hover:bg-rose-700 text-white py-2 mt-6"
+        >
+          {loading ? 'Logging in...' : 'Log In'}
+        </Button>
+      </form>
+
+      {/* Signup Link */}
+      <div className="mt-6 text-center">
+        <p className="text-gray-600">
+          Don&apos;t have an account?{' '}
+          <a href="/auth/signup" className="text-rose-600 hover:text-rose-700 font-medium">
+            Sign up
+          </a>
+        </p>
+      </div>
+    </Card>
+  )
+}
+
+/**
+ * Login Page Component
+ * Allows users to log in with email and password
+ * Includes form validation and error handling
+ */
+export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-rose-50 via-white to-pink-50 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
@@ -94,73 +169,10 @@ export default function LoginPage() {
           <p className="text-gray-600">Log in to your account</p>
         </div>
 
-        {/* Form Card */}
-        <Card className="p-8 border-0 shadow-lg">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Success Message */}
-            {message && (
-              <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
-                {message}
-              </div>
-            )}
-
-            {/* Error Message */}
-            {error && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-                {error}
-              </div>
-            )}
-
-            {/* Email Input */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address
-              </label>
-              <Input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="you@example.com"
-                className="w-full"
-              />
-            </div>
-
-            {/* Password Input */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
-              <Input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="••••••••"
-                className="w-full"
-              />
-            </div>
-
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-rose-600 hover:bg-rose-700 text-white py-2 mt-6"
-            >
-              {loading ? 'Logging in...' : 'Log In'}
-            </Button>
-          </form>
-
-          {/* Signup Link */}
-          <div className="mt-6 text-center">
-            <p className="text-gray-600">
-              Don't have an account?{' '}
-              <a href="/auth/signup" className="text-rose-600 hover:text-rose-700 font-medium">
-                Sign up
-              </a>
-            </p>
-          </div>
-        </Card>
+        {/* Form Card wrapped in Suspense */}
+        <Suspense fallback={<div className="text-center p-8">Loading...</div>}>
+          <LoginForm />
+        </Suspense>
 
         {/* Demo Credentials */}
         <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">

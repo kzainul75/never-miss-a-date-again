@@ -44,3 +44,7 @@ Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allow
  ⚠ metadataBase property in metadata export is not set for resolving social open graph or twitter images, using "http://localhost:3000". See https://nextjs.org/docs/app/api-reference/functions/generate-metadata#metadatabase
  GET / 200 in 693ms
  GET / 200 in 212ms
+ ✓ Compiled in 113ms
+ ✓ Compiled in 116ms
+ ✓ Compiled in 171ms
+ ✓ Compiled in 169ms
