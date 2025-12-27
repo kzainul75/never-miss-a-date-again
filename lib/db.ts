@@ -20,7 +20,18 @@ const globalForPrisma = global as unknown as { prisma: PrismaClient }
  * - In production: create a single instance
  */
 const createPrismaClient = () => {
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL })
+  // Check if DATABASE_URL is available
+  const connectionString = process.env.DATABASE_URL
+  
+  if (!connectionString) {
+    // During build time on Vercel, DATABASE_URL might be missing.
+    // We return a proxy or a dummy client to prevent build failure
+    // if the client is imported but not actually used for queries.
+    console.warn('DATABASE_URL is missing. Prisma client will be initialized without a connection.')
+    return new PrismaClient()
+  }
+
+  const pool = new Pool({ connectionString })
   const adapter = new PrismaPg(pool)
   return new PrismaClient({
     adapter,
