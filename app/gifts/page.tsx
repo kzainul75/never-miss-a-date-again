@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Gift, Heart, Search, Star, Sparkles, ShoppingCart } from 'lucide-react'
+import { Gift, Heart, Search, Star, Sparkles, ShoppingCart, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 /**
  * Gift Catalog Page Component
@@ -18,6 +19,7 @@ export default function GiftsPage() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [shopifyProducts, setShopifyProducts] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
+  const [buyingId, setBuyingId] = useState<string | null>(null)
 
   const categories = [
     { id: 'all', label: 'All Gifts' },
@@ -100,20 +102,49 @@ export default function GiftsPage() {
     fetchShopifyProducts();
   }, []);
 
+  const handleBuy = async (gift: any) => {
+    // If it's a mock gift
+    if (!gift.variantId) {
+      toast.info('This is a demo product. Real purchases are available for Shopify items.')
+      return
+    }
+
+    setBuyingId(gift.id)
+    try {
+      const response = await fetch('/api/shopify/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ variantId: gift.variantId }),
+      })
+
+      const data = await response.json()
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl
+      } else {
+        toast.error('Failed to initiate checkout. Please try again.')
+      }
+    } catch (error) {
+      console.error('Checkout error:', error)
+      toast.error('An error occurred. Please try again.')
+    } finally {
+      setBuyingId(null)
+    }
+  }
+
   // Combine Shopify products with mock data if Shopify is not used
   const displayGifts = shopifyProducts.length > 0 
     ? shopifyProducts.map(p => ({
         id: p.id,
+        variantId: p.variants.edges[0]?.node.id,
         name: p.title,
-        category: 'all', // Shopify categories can be mapped from tags/collections
+        category: 'all',
         price: parseFloat(p.priceRange.minVariantPrice.amount),
-        rating: 5.0, // Shopify doesn't have ratings by default
+        rating: 5.0,
         reviews: 0,
         trending: false,
         image: p.images.edges[0]?.node.url,
         color: 'from-rose-100 to-pink-100',
         textColor: 'text-rose-600',
-        checkoutUrl: p.checkoutUrl
       }))
     : mockGifts;
 
@@ -235,8 +266,17 @@ export default function GiftsPage() {
                       <button className="p-2 hover:bg-gray-100 rounded-lg transition">
                         <Heart className="w-5 h-5 text-gray-400 hover:text-pink-600" />
                       </button>
-                      <Button size="sm" className="bg-rose-600 hover:bg-rose-700">
-                        <ShoppingCart className="w-4 h-4 mr-2" />
+                      <Button 
+                        size="sm" 
+                        className="bg-rose-600 hover:bg-rose-700"
+                        onClick={() => handleBuy(gift)}
+                        disabled={buyingId === gift.id}
+                      >
+                        {buyingId === gift.id ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <ShoppingCart className="w-4 h-4 mr-2" />
+                        )}
                         Buy
                       </Button>
                     </div>
