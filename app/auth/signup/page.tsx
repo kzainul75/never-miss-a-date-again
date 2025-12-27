@@ -91,7 +91,7 @@ export default function SignupPage() {
             <div className="w-10 h-10 bg-gradient-to-br from-rose-500 to-pink-500 rounded-lg flex items-center justify-center">
               <Sparkles className="w-6 h-6 text-white" />
             </div>
-            <span className="text-2xl font-bold text-gray-900">Bloom & Gift</span>
+            <span className="text-2xl font-bold text-gray-900">Never Miss a Date Again</span>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h1>
           <p className="text-gray-600">Join us to manage your important dates</p>
