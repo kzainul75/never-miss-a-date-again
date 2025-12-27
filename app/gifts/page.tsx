@@ -1,12 +1,17 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Gift, Heart, Search, Star } from 'lucide-react'
+import { Gift, Heart, Search, Star, Sparkles } from 'lucide-react'
 
+/**
+ * Gift Catalog Page Component
+ * Updated with new branding and functional navigation
+ */
 export default function GiftsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
@@ -134,6 +139,25 @@ export default function GiftsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Navigation */}
+      <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition">
+            <div className="w-8 h-8 bg-gradient-to-br from-rose-500 to-pink-500 rounded-lg flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-lg font-bold text-gray-900">Never Miss a Date Again</span>
+          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/dashboard" className="text-sm text-gray-600 hover:text-rose-600 transition">Dashboard</Link>
+            <Link href="/shops" className="text-sm text-gray-600 hover:text-rose-600 transition">Shops</Link>
+            <Link href="/auth/login">
+              <Button variant="outline" size="sm" className="border-rose-200 text-rose-600 hover:bg-rose-50">Log In</Button>
+            </Link>
+          </div>
+        </div>
+      </nav>
+
       {/* Header */}
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -176,7 +200,7 @@ export default function GiftsPage() {
         </div>
 
         {/* Gifts Grid */}
-        <div className="grid md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredGifts.map(gift => (
             <Card key={gift.id} className="overflow-hidden border-0 shadow-sm hover:shadow-lg transition hover:scale-105 duration-300">
               <div className={`h-48 bg-gradient-to-br ${gift.color} flex items-center justify-center relative`}>

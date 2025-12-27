@@ -1,12 +1,17 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { MapPin, Phone, Globe, Clock, Star, Search } from 'lucide-react'
+import { MapPin, Phone, Globe, Clock, Star, Search, Sparkles } from 'lucide-react'
 
+/**
+ * Shop Directory Page Component
+ * Updated with new branding and functional navigation
+ */
 export default function ShopsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState('rating')
@@ -117,6 +122,25 @@ export default function ShopsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Navigation */}
+      <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition">
+            <div className="w-8 h-8 bg-gradient-to-br from-rose-500 to-pink-500 rounded-lg flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-lg font-bold text-gray-900">Never Miss a Date Again</span>
+          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/dashboard" className="text-sm text-gray-600 hover:text-rose-600 transition">Dashboard</Link>
+            <Link href="/gifts" className="text-sm text-gray-600 hover:text-rose-600 transition">Gifts</Link>
+            <Link href="/auth/login">
+              <Button variant="outline" size="sm" className="border-rose-200 text-rose-600 hover:bg-rose-50">Log In</Button>
+            </Link>
+          </div>
+        </div>
+      </nav>
+
       {/* Header */}
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

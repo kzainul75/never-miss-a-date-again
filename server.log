@@ -48,3 +48,38 @@ Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allow
  ✓ Compiled in 116ms
  ✓ Compiled in 171ms
  ✓ Compiled in 169ms
+ ○ Compiling /auth/login ...
+ ✓ Compiled /auth/login in 752ms
+ ⨯ [Error: ENOENT: no such file or directory, open '/home/code/florist-gift-app/.next/static/development/_buildManifest.js.tmp.0ec4isia8tdt'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/home/code/florist-gift-app/.next/static/development/_buildManifest.js.tmp.0ec4isia8tdt'
+}
+ ○ Compiling /_error ...
+ ✓ Compiled /_error in 2.2s
+ ⨯ [Error: ENOENT: no such file or directory, open '/home/code/florist-gift-app/.next/static/development/_buildManifest.js.tmp.qfs50td0x9e'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/home/code/florist-gift-app/.next/static/development/_buildManifest.js.tmp.qfs50td0x9e'
+}
+[Error: ENOENT: no such file or directory, open '/home/code/florist-gift-app/.next/static/development/_buildManifest.js.tmp.0ec4isia8tdt'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/home/code/florist-gift-app/.next/static/development/_buildManifest.js.tmp.0ec4isia8tdt'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/home/code/florist-gift-app/.next/static/development/_buildManifest.js.tmp.7au6a9wu4v9'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/home/code/florist-gift-app/.next/static/development/_buildManifest.js.tmp.7au6a9wu4v9'
+}
+[Error: ENOENT: no such file or directory, open '/home/code/florist-gift-app/.next/static/development/_buildManifest.js.tmp.qbpltp74zl'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/home/code/florist-gift-app/.next/static/development/_buildManifest.js.tmp.qbpltp74zl'
+}
+ ✓ Compiled in 123ms
